@@ -6,7 +6,10 @@ from PIL import Image
 app = Flask(__name__)
 
 UPLOAD_FOLDER = "uploads"
-MODEL_PATH = os.path.join("models", "detector.pkl")
+MODEL_CANDIDATES = [
+    os.path.join("models", "detector.pkl"),
+    "detector.pkl",
+]
 IMG_SIZE = (32, 32)
 ALLOWED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".jpe"}
 
@@ -40,10 +43,11 @@ def distance_sq(a, b):
 
 
 def load_model():
-    if not os.path.exists(MODEL_PATH):
-        return None
-    with open(MODEL_PATH, "rb") as f:
-        return pickle.load(f)
+    for path in MODEL_CANDIDATES:
+        if os.path.exists(path):
+            with open(path, "rb") as f:
+                return pickle.load(f)
+    return None
 
 
 def analyze_single_image(img_path, label_title, model):
@@ -148,6 +152,7 @@ def index():
         comparison=comparison,
         error_msg=error_msg,
     )
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

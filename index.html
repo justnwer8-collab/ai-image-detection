@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>منصة التحقق ومقارنة الصور بالذكاء الاصطناعي</title>
+  <style>
+    :root {
+      --primary: #1b5e3a;
+      --primary-dark: #124228;
+      --primary-soft: #eaf5ef;
+      --bg: #f4f6f8;
+      --surface: #ffffff;
+      --text: #16202a;
+      --muted: #5c6b79;
+      --border: #dce3e8;
+      --real-bg: #e7f6ed;
+      --real-text: #135c33;
+      --ai-bg: #eef2ff;
+      --ai-text: #273c9e;
+      --warn-bg: #fef3c7;
+      --warn-text: #92400e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* الشريط العلوي */
+    .topbar {
+      background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+      color: #fff;
+      border-bottom: 4px solid #c59b27;
+      padding: 16px 24px;
+    }
+
+    .topbar-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 19px;
+      font-weight: 700;
+    }
+
+    .brand p {
+      margin: 2px 0 0;
+      font-size: 12.5px;
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .status-pill {
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    /* الحاوية الرئيسية */
+    .container {
+      max-width: 1080px;
+      margin: 28px auto;
+      padding: 0 20px 40px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+      margin-bottom: 22px;
+    }
+
+    .section-header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+    }
+
+    .section-header h2 {
+      margin: 0;
+      font-size: 17px;
+      color: var(--primary-dark);
+    }
+
+    .section-header p {
+      margin: 4px 0 0;
+      font-size: 13.5px;
+      color: var(--muted);
+    }
+
+    /* شبكة رفع الصورتين */
+    .upload-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 720px) {
+      .upload-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .upload-box {
+      border: 1.5px dashed #b8c4ce;
+      border-radius: 10px;
+      padding: 18px;
+      background: #fafbfc;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .upload-box:hover {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .upload-box label {
+      display: block;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .upload-box .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .upload-box input[type="file"] {
+      width: 100%;
+      font-size: 13px;
+      padding: 6px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 24px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .alert-error {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+
+    /* بطاقة ملخص المقارنة */
+    .summary-box {
+      background: var(--primary-soft);
+      border: 1px solid #b9dec9;
+      border-right: 4px solid var(--primary);
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-bottom: 20px;
+    }
+
+    .summary-title {
+      font-weight: 700;
+      font-size: 14.5px;
+      color: var(--primary-dark);
+      margin-bottom: 4px;
+    }
+
+    .summary-text {
+      margin: 0;
+      font-size: 13.5px;
+      color: var(--text);
+    }
+
+    /* نتائج المقارنة جنباً إلى جنب */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+    }
+
+    .result-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      background: #fff;
+    }
+
+    .result-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .slot-label {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .badge {
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .badge-real {
+      background: var(--real-bg);
+      color: var(--real-text);
+    }
+
+    .badge-ai {
+      background: var(--ai-bg);
+      color: var(--ai-text);
+    }
+
+    .verdict-main {
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0 0 12px;
+    }
+
+    .metrics {
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .metrics div {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .metrics strong {
+      color: var(--text);
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-badge">AI</div>
+        <div>
+          <h1>خدمة التحقق ومقارنة الصور الرقمية</h1>
+          <p>تصنيف ومقارنة الصور الحقيقية والمولّدة بالذكاء الاصطناعي</p>
+        </div>
+      </div>
+      <div class="status-pill">
+        {% if model_ready %}
+          حالة النموذج: جاهز للتشغيل
+        {% else %}
+          حالة النموذج: غير مهيأ
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div class="section-header">
+        <h2>إدخال الصور للفحص والمقارنة</h2>
+        <p>يمكنك إرفاق صورتين معاً في نفس الوقت لمقارنة نتائجهما مباشرة، أو إرفاق صورة واحدة للفحص الفردي.</p>
+      </div>
+
+      {% if error_msg %}
+        <div class="alert-error">{{ error_msg }}</div>
+      {% endif %}
+
+      <form method="POST" enctype="multipart/form-data">
+        <div class="upload-grid">
+          <div class="upload-box">
+            <label for="image_1">الصورة الأولى (اختياري/مقارنة)</label>
+            <span class="hint">الامتدادات المدعومة: JPG, JPEG, PNG, WEBP</span>
+            <input id="image_1" type="file" name="image_1" accept="image/*" />
+          </div>
+
+          <div class="upload-box">
+            <label for="image_2">الصورة الثانية (للمقارنة المباشرة)</label>
+            <span class="hint">ارفع صورة ثانية لمقارنتها مع الأولى في نفس العملية</span>
+            <input id="image_2" type="file" name="image_2" accept="image/*" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn-primary">بدء الفحص والمقارنة</button>
+        </div>
+      </form>
+    </section>
+
+    {% if res1 or res2 %}
+      <section class="card">
+        <div class="section-header">
+          <h2>نتائج التحليل والمقارنة</h2>
+          <p>عرض تفصيلي لنتيجة كل صورة ومؤشرات القرب من مراكز الفئات التدريبية.</p>
+        </div>
+
+        {% if comparison %}
+          <div class="summary-box">
+            <div class="summary-title">خلاصة المقارنة بين الصورتين</div>
+            <p class="summary-text">{{ comparison }}</p>
+          </div>
+        {% endif %}
+
+        <div class="results-grid">
+          {% for item in [res1, res2] if item %}
+            <div class="result-card">
+              <div class="result-top">
+                <span class="slot-label">{{ item.slot }}</span>
+                {% if item.is_real %}
+                  <span class="badge badge-real">حقيقية</span>
+                {% else %}
+                  <span class="badge badge-ai">ذكاء اصطناعي</span>
+                {% endif %}
+              </div>
+
+              <p class="verdict-main">{{ item.verdict }}</p>
+
+              <div class="metrics">
+                <div><span>اسم الملف:</span><strong>{{ item.filename }}</strong></div>
+                <div><span>مؤشر التقارب النسبي:</span><strong>{{ item.score_pct }}%</strong></div>
+                <div><span>المسافة عن مركز Real:</span><strong>{{ item.d_real }}</strong></div>
+                <div><span>المسافة عن مركز AI:</span><strong>{{ item.d_ai }}</strong></div>
+                <div><span>متوسط RGB:</span><strong>{{ item.rgb }}</strong></div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    <div class="footer-note">
+      يعمل النموذج محلياً عبر Flask و Pillow مع مراكز التصنيف المحفوظة في detector.pkl
+    </div>
+  </main>
+</body>
+</html>
